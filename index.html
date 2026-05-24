@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小公司财务与客户管理系统</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边导航 -->
+        <nav class="sidebar">
+            <div class="logo">
+                <h2>📊 管理系统</h2>
+            </div>
+            <!-- 当前用户信息 -->
+            <div class="user-info" id="sidebar-user">
+                <span id="sidebar-user-name">未登录</span>
+                <span class="user-role-badge" id="sidebar-user-role">-</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active" data-page="dashboard">
+                    <span class="nav-icon">📈</span>
+                    <span>总览仪表盘</span>
+                </li>
+                <li class="nav-divider">财务管理</li>
+                <li class="nav-item" data-page="online-income">
+                    <span class="nav-icon">💻</span>
+                    <span>线上结算款</span>
+                </li>
+                <li class="nav-item" data-page="offline-income">
+                    <span class="nav-icon">🏪</span>
+                    <span>线下结算款</span>
+                </li>
+                <li class="nav-item" data-page="receivable">
+                    <span class="nav-icon">📋</span>
+                    <span>应收账款</span>
+                </li>
+                <li class="nav-item" data-page="goods-expense">
+                    <span class="nav-icon">📦</span>
+                    <span>货物支出款</span>
+                </li>
+                <li class="nav-item" data-page="transport-expense">
+                    <span class="nav-icon">🚗</span>
+                    <span>交通支出款</span>
+                </li>
+                <li class="nav-item" data-page="promotion-expense">
+                    <span class="nav-icon">📢</span>
+                    <span>平台推广支出</span>
+                </li>
+                <li class="nav-item" data-page="rent-expense">
+                    <span class="nav-icon">🏠</span>
+                    <span>房屋租金支出</span>
+                </li>
+                <li class="nav-item" data-page="salary-expense">
+                    <span class="nav-icon">👨‍💼</span>
+                    <span>人员工资支出</span>
+                </li>
+                <li class="nav-divider">客户管理</li>
+                <li class="nav-item" data-page="client-manage">
+                    <span class="nav-icon">🤝</span>
+                    <span>客户管理</span>
+                </li>
+                <li class="nav-item" data-page="potential-client">
+                    <span class="nav-icon">🔍</span>
+                    <span>潜在客户管理</span>
+                </li>
+                <li class="nav-item" data-page="lost-client">
+                    <span class="nav-icon">❌</span>
+                    <span>未成交客户管理</span>
+                </li>
+                <li class="nav-divider">系统管理</li>
+                <li class="nav-item" data-page="operation-log">
+                    <span class="nav-icon">📝</span>
+                    <span>操作日志</span>
+                </li>
+                <li class="nav-item" data-page="user-manage">
+                    <span class="nav-icon">👤</span>
+                    <span>用户与权限</span>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <header class="top-bar">
+                <h1 id="page-title">总览仪表盘</h1>
+                <div class="header-actions">
+                    <span class="current-user-display" id="current-user-display">当前用户：<strong>未登录</strong></span>
+                    <button class="btn btn-sm btn-outline" onclick="showLoginModal()">🔑 登录</button>
+                    <button class="btn btn-sm btn-outline" onclick="logout()">🚪 退出</button>
+                    <button class="btn btn-sm btn-outline" onclick="exportData()">📤 导出JSON</button>
+                    <button class="btn btn-sm btn-outline" onclick="exportExcel()">📊 导出Excel</button>
+                    <button class="btn btn-sm btn-outline" onclick="importData()">📥 导入数据</button>
+                    <input type="file" id="importFile" accept=".json,.csv" style="display:none" onchange="handleImport(event)">
+                    <button class="btn btn-sm btn-danger" onclick="clearAllData()">🗑️ 清空数据</button>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <!-- 仪表盘 -->
+                <div id="page-dashboard" class="page active">
+                    <div class="dashboard-cards">
+                        <div class="card card-income">
+                            <div class="card-icon">💰</div>
+                            <div class="card-info">
+                                <span class="card-label">总收入</span>
+                                <span class="card-value" id="total-income">¥0.00</span>
+                            </div>
+                        </div>
+                        <div class="card card-expense">
+                            <div class="card-icon">💸</div>
+                            <div class="card-info">
+                                <span class="card-label">总支出</span>
+                                <span class="card-value" id="total-expense">¥0.00</span>
+                            </div>
+                        </div>
+                        <div class="card card-profit">
+                            <div class="card-icon">📊</div>
+                            <div class="card-info">
+                                <span class="card-label">净利润</span>
+                                <span class="card-value" id="total-profit">¥0.00</span>
+                            </div>
+                        </div>
+                        <div class="card card-client">
+                            <div class="card-icon">👥</div>
+                            <div class="card-info">
+                                <span class="card-label">客户总数</span>
+                                <span class="card-value" id="total-clients">0</span>
+                            </div>
+                        </div>
+                        <div class="card card-receivable">
+                            <div class="card-icon">📋</div>
+                            <div class="card-info">
+                                <span class="card-label">应收账款</span>
+                                <span class="card-value" id="total-receivable">¥0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dashboard-charts">
+                        <div class="chart-box">
+                            <h3>收支概览</h3>
+                            <canvas id="incomeExpenseChart"></canvas>
+                        </div>
+                        <div class="chart-box">
+                            <h3>支出构成</h3>
+                            <canvas id="expensePieChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="dashboard-tables">
+                        <div class="table-box">
+                            <h3>最近收支记录</h3>
+                            <table class="data-table" id="recent-records-table">
+                                <thead>
+                                    <tr>
+                                        <th>日期</th>
+                                        <th>类型</th>
+                                        <th>类别</th>
+                                        <th>金额</th>
+                                        <th>操作人</th>
+                                        <th>备注</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recent-records-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 线上结算款 -->
+                <div id="page-online-income" class="page">
+                    <div class="page-toolbar">
+                        <button class="btn btn-primary" onclick="showAddModal('online-income')">➕ 新增线上结算款</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>日期</th><th>金额</th><th>来源平台</th><th>发票号</th><th>操作人</th><th>备注</th><th>操作</th></tr>
+                        </thead>
+                        <tbody id="online-income-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- 线下结算款 -->
+                <div id="page-offline-income" class="page">
+                    <div class="page-toolbar">
+                        <button class="btn btn-primary" onclick="showAddModal('offline-income')">➕ 新增线下结算款</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>日期</th><th>金额</th><th>客户/来源</th><th>发票号</th><th>操作人</th><th>备注</th><th>操作</th></tr>
+                        </thead>
+                        <tbody id="offline-income-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- 应收账款 -->
+                <div id="page-receivable" class="page">
+                    <div class="page-toolbar">
+                        <button class="btn btn-primary" onclick="showAddModal('receivable')">➕ 新增应收账款</button>
+                    </div>
+                    <div class="summary-bar">
+                        <span>应收总额：<strong id="receivable-total">¥0.00</strong></span>
+                        <span>已收回款：<strong id="receivable-paid">¥0.00</strong></span>
+                        <span>未收余额：<strong id="receivable-balance">¥0.00</strong></span>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>客户名称</th><th>应收金额</th><th>已收金额</th><th>未收金额</th><th>账单日期</th><th>付款日期</th><th>发票号</th><th>状态</th><th>操作人</th><th>备注</th><th>操作</th></tr>
+                        </thead>
+                        <tbody id="receivable-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- 货物支出款 -->
+                <div id="page-goods-expense" class="page">
+                    <div class="page-toolbar">
+                        <button class="btn btn-primary" onclick="showAddModal('goods-expense')">➕ 新增货物支出</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>日期</th><th>金额</th><th>货物名称</th><th>发票号</th><th>操作人</th><th>备注</th><th>操作</th></tr>
+                        </thead>
+                        <tbody id="goods-expense-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- 交通支出款 -->
+                <div id="page-transport-expense" class="page">
+                    <div class="page-toolbar">
+                        <button class="btn btn-primary" onclick="showAddModal('transport-expense')">➕ 新增交通支出</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>日期</th><th>金额</th><th>交通方式</th><th>操作人</th><th>备注</th><th>操作</th></tr>
+                        </thead>
+                        <tbody id="transport-expense-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- 平台推广支出 -->
+                <div id="page-promotion-expense" class="page">
+                    <div class="page-toolbar">
+                        <button class="btn btn-primary" onclick="showAddModal('promotion-expense')">➕ 新增推广支出</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>日期</th><th>金额</th><th>推广平台</th><th>发票号</th><th>操作人</th><th>备注</th><th>操作</th></tr>
+                        </thead>
+                        <tbody id="promotion-expense-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- 房屋租金支出 -->
+                <div id="page-rent-expense" class="page">
+                    <div class="page-toolbar">
+                        <button class="btn btn-primary" onclick="showAddModal('rent-expense')">➕ 新增租金支出</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>日期</th><th>金额</th><th>房屋地址</th><th>发票号</th><th>操作人</th><th>备注</th><th>操作</th></tr>
+                        </thead>
+                        <tbody id="rent-expense-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- 人员工资支出 -->
+                <div id="page-salary-expense" class="page">
+                    <div class="page-toolbar">
+                        <button class="btn btn-primary" onclick="showAddModal('salary-expense')">➕ 新增工资支出</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>日期</th><th>金额</th><th>员工姓名</th><th>操作人</th><th>备注</th><th>操作</th></tr>
+                        </thead>
+                        <tbody id="salary-expense-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- 客户管理 -->
+                <div id="page-client-manage" class="page">
+                    <div class="page-toolbar">
+                        <button class="btn btn-primary" onclick="showAddModal('client-manage')">➕ 新增客户</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>姓名</th><th>电话</th><th>公司</th><th>成交金额</th><th>跟进状态</th><th>负责人</th><th>备注</th><th>操作</th></tr>
+                        </thead>
+                        <tbody id="client-manage-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- 潜在客户管理 -->
+                <div id="page-potential-client" class="page">
+                    <div class="page-toolbar">
+                        <button class="btn btn-primary" onclick="showAddModal('potential-client')">➕ 新增潜在客户</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>姓名</th><th>电话</th><th>公司</th><th>意向度</th><th>跟进状态</th><th>负责人</th><th>备注</th><th>操作</th></tr>
+                        </thead>
+                        <tbody id="potential-client-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- 未成交客户管理 -->
+                <div id="page-lost-client" class="page">
+                    <div class="page-toolbar">
+                        <button class="btn btn-primary" onclick="showAddModal('lost-client')">➕ 新增未成交客户</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>姓名</th><th>电话</th><th>公司</th><th>未成交原因</th><th>负责人</th><th>备注</th><th>操作</th></tr>
+                        </thead>
+                        <tbody id="lost-client-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- 操作日志 -->
+                <div id="page-operation-log" class="page">
+                    <div class="page-toolbar">
+                        <button class="btn btn-outline" onclick="clearLogs()">🗑️ 清空日志</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>时间</th><th>操作人</th><th>角色</th><th>操作类型</th><th>操作对象</th><th>详情</th></tr>
+                        </thead>
+                        <tbody id="operation-log-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- 用户与权限管理 -->
+                <div id="page-user-manage" class="page">
+                    <div class="page-toolbar">
+                        <button class="btn btn-primary" onclick="showAddModal('user-manage')">➕ 新增用户</button>
+                    </div>
+                    <div class="info-box">
+                        <strong>角色说明：</strong>
+                        <span class="role-tag role-admin">管理员</span> - 全部权限
+                        <span class="role-tag role-finance">财务</span> - 只能编辑账目，不能改客户
+                        <span class="role-tag role-sales">客服及销售</span> - 只能看自己的客户
+
+                        <span class="role-tag role-viewer">查看者</span> - 只能查看不能编辑
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>用户名</th><th>角色</th><th>姓名</th><th>状态</th><th>操作</th></tr>
+                        </thead>
+                        <tbody id="user-manage-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 新增/编辑弹窗 -->
+    <div id="modal-overlay" class="modal-overlay" style="display:none">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-title">新增</h3>
+                <span class="modal-close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- 动态生成 -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveModalData()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 登录弹窗 -->
+    <div id="login-overlay" class="modal-overlay" style="display:none">
+        <div class="modal" style="width:360px;">
+            <div class="modal-header">
+                <h3>🔑 用户登录</h3>
+                <span class="modal-close" onclick="closeLoginModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>选择用户</label>
+                    <select id="login-user-select"></select>
+                </div>
+                <div class="form-group" style="text-align:center;color:#999;font-size:12px;margin-top:10px;">
+                    提示：首次使用请先在"用户与权限"页面添加用户
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeLoginModal()">取消</button>
+                <button class="btn btn-primary" onclick="doLogin()">登录</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
