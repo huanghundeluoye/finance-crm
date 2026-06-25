@@ -9,9 +9,10 @@ const PAGE_NAMES = {
   'goods-expense': '货物支出款', 'transport-expense': '交通支出款', 'promotion-expense': '平台推广支出',
   'rent-expense': '房屋租金支出', 'salary-expense': '人员工资支出',
   'client-manage': '客户管理', 'potential-client': '潜在客户管理', 'lost-client': '未成交客户管理',
+  'fixed-task': '固定客户作业表',
   'operation-log': '操作日志', 'user-manage': '用户与权限'
 };
-const INVOICE_PAGES = ['online-income', 'offline-income', 'receivable', 'goods-expense', 'promotion-expense', 'rent-expense'];
+const INVOICE_PAGES = ['online-income', 'offline-income', 'receivable', 'goods-expense', 'promotion-expense', 'rent-expense', 'fixed-task']; // fixed-task 不需要发票校验，但加进去无害
 
 let editingId = null;
 let currentModalPage = null;
@@ -349,6 +350,9 @@ async function renderTable(pageKey) {
       case 'lost-client':
         html += `<td>${escapeHtml(item.name || '-')}</td><td>${escapeHtml(item.phone || '-')}</td><td>${escapeHtml(item.company || '-')}</td><td>${escapeHtml(item.reason || '-')}</td><td>${escapeHtml(item.assignedTo || '-')}</td><td>${escapeHtml(item.remark || '-')}</td>`;
         break;
+      case 'fixed-task':
+        html += `<td>${escapeHtml(item.clientName || '-')}</td><td>${formatDate(item.date)}</td><td>${escapeHtml(item.taskContent || '-')}</td><td>${escapeHtml(item.assignee || '-')}</td><td><span class="status-tag ${item.status === '已完成' ? 'status-paid' : 'status-unpaid'}">${escapeHtml(item.status || '未完成')}</span></td><td>${escapeHtml(item.remark || '-')}</td>`;
+        break;
       case 'operation-log':
         html += `<td>${formatDateTime(item.time)}</td><td>${escapeHtml(item.operator)}</td><td>${escapeHtml(item.role)}</td><td>${escapeHtml(item.actionType)}</td><td>${escapeHtml(item.objectType)}</td><td>${escapeHtml(item.detail)}</td>`;
         break;
@@ -543,6 +547,16 @@ function buildForm(pageKey, item) {
         { label: '未成交原因', type: 'text', key: 'reason', value: v('reason', ''), placeholder: '如：价格原因、选择其他供应商等', required: true },
         { label: '负责人', type: 'select', key: 'assignedTo', value: v('assignedTo', ''), options: getSalesUserOptions() },
         { label: '备注', type: 'textarea', key: 'remark', value: v('remark', ''), placeholder: '选填' }
+      ];
+      break;
+    case 'fixed-task':
+      fields = [
+        { label: '客户名称', type: 'text', key: 'clientName', value: v('clientName', ''), placeholder: '必填', required: true },
+        { label: '日期', type: 'date', key: 'date', value: v('date', getToday()), required: true },
+        { label: '作业内容', type: 'textarea', key: 'taskContent', value: v('taskContent', ''), placeholder: '请描述作业内容', required: true },
+        { label: '负责人', type: 'text', key: 'assignee', value: v('assignee', ''), placeholder: '负责作业的人员姓名', required: true },
+        { label: '状态', type: 'select', key: 'status', value: v('status', '已完成'), options: ['已完成', '未完成'] },
+        { label: '备注', type: 'textarea', key: 'remark', value: v('remark', ''), placeholder: '可选' }
       ];
       break;
     case 'user-manage':

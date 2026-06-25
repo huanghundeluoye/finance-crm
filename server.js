@@ -103,7 +103,8 @@ const ALLOWED_PAGES = [
   'online-income', 'offline-income', 'receivable',
   'goods-expense', 'transport-expense', 'promotion-expense',
   'rent-expense', 'salary-expense',
-  'client-manage', 'potential-client', 'lost-client'
+  'client-manage', 'potential-client', 'lost-client',
+  'fixed-task'
 ];
 
 // 获取数据列表
@@ -272,7 +273,8 @@ function getPageName(key) {
     'online-income': '线上结算款', 'offline-income': '线下结算款', 'receivable': '应收账款',
     'goods-expense': '货物支出款', 'transport-expense': '交通支出款', 'promotion-expense': '平台推广支出',
     'rent-expense': '房屋租金支出', 'salary-expense': '人员工资支出',
-    'client-manage': '客户管理', 'potential-client': '潜在客户管理', 'lost-client': '未成交客户管理'
+    'client-manage': '客户管理', 'potential-client': '潜在客户管理', 'lost-client': '未成交客户管理',
+    'fixed-task': '固定客户作业表'
   };
   return map[key] || key;
 }
