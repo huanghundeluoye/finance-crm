@@ -246,10 +246,10 @@ function validateData(pageKey, data, editingId) {
             }
         }
         // 已收金额不能大于应收金额
-        if (data.receivedAmount && data.totalAmount) {
-            if (Number(data.receivedAmount) > Number(data.totalAmount)) {
-                errors.push('已收金额不能大于应收金额');
-            }
+        const recvAmt = Number(data.receivedAmount) || 0;
+        const totalAmt = Number(data.totalAmount) || 0;
+        if (totalAmt > 0 && recvAmt > totalAmt) {
+            errors.push('已收金额不能大于应收金额');
         }
     }
 
@@ -647,6 +647,14 @@ function saveModalData() {
         if (!data.username) { alert('请填写用户名'); return; }
     } else if (pageKey.startsWith('client') || pageKey === 'potential-client' || pageKey === 'lost-client') {
         if (!data.name) { alert('请填写客户姓名'); return; }
+    } else if (pageKey === 'receivable') {
+        // 应收账款使用 totalAmount 字段名
+        if (data.totalAmount === '' || isNaN(Number(data.totalAmount)) || Number(data.totalAmount) < 0) {
+            alert('请填写有效的应收金额');
+            return;
+        }
+        data.totalAmount = Number(data.totalAmount);
+        data.receivedAmount = Number(data.receivedAmount) || 0;
     } else {
         if (data.amount === '' || isNaN(data.amount) || Number(data.amount) < 0) {
             alert('请填写有效的金额');
