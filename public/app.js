@@ -626,6 +626,10 @@ async function saveModalData() {
     }
     data.totalAmount = Number(data.totalAmount);
     data.receivedAmount = Number(data.receivedAmount) || 0;
+  } else if (pageKey === 'fixed-task') {
+    if (!data.clientName || !data.taskContent) {
+      alert('请填写客户名称和作业内容'); return;
+    }
   } else {
     if (data.amount === '' || isNaN(data.amount) || Number(data.amount) < 0) {
       alert('请填写有效的金额'); return;
