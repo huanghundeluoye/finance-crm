@@ -12,7 +12,7 @@ const PAGE_NAMES = {
   'fixed-task': '固定客户作业表',
   'operation-log': '操作日志', 'user-manage': '用户与权限'
 };
-const INVOICE_PAGES = ['online-income', 'offline-income', 'receivable', 'goods-expense', 'promotion-expense', 'rent-expense', 'fixed-task']; // fixed-task 不需要发票校验，但加进去无害
+const INVOICE_PAGES = ['online-income', 'offline-income', 'receivable', 'goods-expense', 'promotion-expense', 'rent-expense'];
 
 let editingId = null;
 let currentModalPage = null;
@@ -342,7 +342,7 @@ async function renderTable(pageKey) {
         html += `<td>${formatDate(item.date)}</td><td>${formatMoney(item.amount)}</td><td>${escapeHtml(item.employeeName || '-')}</td><td>${escapeHtml(item.operator || '-')}</td><td>${escapeHtml(item.remark || '-')}</td>`;
         break;
       case 'client-manage':
-        html += `<td>${escapeHtml(item.name || '-')}</td><td>${escapeHtml(item.phone || '-')}</td><td>${escapeHtml(item.company || '-')}</td><td>${formatMoney(item.dealAmount || 0)}</td><td>${escapeHtml(item.status || '-')}</td><td>${escapeHtml(item.assignedTo || '-')}</td><td>${escapeHtml(item.remark || '-')}</td>`;
+        html += `<td><a href="javascript:void(0)" onclick="showClientDetail('${item.id}')" style="color:#1890ff;text-decoration:none;font-weight:500;">${escapeHtml(item.name || '-')}</a></td><td>${escapeHtml(item.phone || '-')}</td><td>${escapeHtml(item.company || '-')}</td><td>${formatMoney(item.dealAmount || 0)}</td><td>${escapeHtml(item.status || '-')}</td><td>${escapeHtml(item.assignedTo || '-')}</td><td>${escapeHtml(item.remark || '-')}</td>`;
         break;
       case 'potential-client':
         html += `<td>${escapeHtml(item.name || '-')}</td><td>${escapeHtml(item.phone || '-')}</td><td>${escapeHtml(item.company || '-')}</td><td>${escapeHtml(item.intention || '-')}</td><td>${escapeHtml(item.status || '-')}</td><td>${escapeHtml(item.assignedTo || '-')}</td><td>${escapeHtml(item.remark || '-')}</td>`;
@@ -845,6 +845,129 @@ async function clearLogs() {
     renderTable('operation-log');
   } catch (e) { if (e.message !== '登录已过期') alert('操作失败'); }
 }
+
+// ==================== 客户详情（含作业记录） ====================
+
+async function showClientDetail(clientId) {
+  try {
+    const clients = await getData('client-manage');
+    const client = clients.find(c => c.id === clientId);
+    if (!client) { alert('客户不存在'); return; }
+
+    // 隐藏所有页面，显示客户详情页
+    document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+    document.getElementById('page-client-detail').classList.add('active');
+
+    // 显示客户信息
+    document.getElementById('client-detail-name').textContent = `👤 ${client.name}`;
+    document.getElementById('client-detail-info').innerHTML = `
+      <div style="display:flex;gap:30px;flex-wrap:wrap;">
+        <span><strong>电话：</strong>${escapeHtml(client.phone || '-')}</span>
+        <span><strong>公司：</strong>${escapeHtml(client.company || '-')}</span>
+        <span><strong>成交金额：</strong>${formatMoney(client.dealAmount || 0)}</span>
+        <span><strong>跟进状态：</strong>${escapeHtml(client.status || '-')}</span>
+        <span><strong>负责人：</strong>${escapeHtml(client.assignedTo || '-')}</span>
+        <span><strong>备注：</strong>${escapeHtml(client.remark || '-')}</span>
+      </div>
+    `;
+
+    // 保存当前客户到全局变量
+    window._currentClient = client;
+    await renderClientTasks(client.name);
+  } catch (e) { if (e.message !== '登录已过期') alert('加载失败'); }
+}
+
+async function renderClientTasks(clientName) {
+  try {
+    const allTasks = await getData('fixed-task');
+    const tasks = allTasks.filter(t => t.clientName === clientName);
+    const tbody = document.getElementById('client-task-body');
+
+    if (tasks.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;padding:20px;">暂无作业记录</td></tr>';
+      return;
+    }
+
+    let html = '';
+    tasks.forEach(item => {
+      html += `<tr>
+        <td>${formatDate(item.date)}</td>
+        <td>${escapeHtml(item.taskContent || '-')}</td>
+        <td>${escapeHtml(item.assignee || '-')}</td>
+        <td><span class="status-tag ${item.status === '已完成' ? 'status-paid' : 'status-unpaid'}">${escapeHtml(item.status || '未完成')}</span></td>
+        <td>${escapeHtml(item.remark || '-')}</td>
+        <td>
+          <button class="btn-edit" onclick="editClientTask('${item.id}')">✏️ 编辑</button>
+          <button class="btn-delete" onclick="deleteClientTask('${item.id}')">🗑️ 删除</button>
+        </td>
+      </tr>`;
+    });
+    tbody.innerHTML = html;
+  } catch (e) { if (e.message !== '登录已过期') console.error(e); }
+}
+
+async function editClientTask(taskId) {
+  if (!checkPermission('edit', 'fixed-task')) return;
+  const allTasks = await getData('fixed-task');
+  const task = allTasks.find(t => t.id === taskId);
+  if (!task) return;
+
+  editingId = taskId;
+  currentModalPage = 'fixed-task';
+  document.getElementById('modal-title').textContent = '编辑作业记录';
+  document.getElementById('modal-body').innerHTML = buildForm('fixed-task', task);
+  document.getElementById('modal-overlay').style.display = 'flex';
+}
+
+async function deleteClientTask(taskId) {
+  if (!checkPermission('delete', 'fixed-task')) return;
+  if (!confirm('确定要删除此作业记录吗？')) return;
+  try {
+    await API.del(`/api/data/fixed-task/${taskId}`);
+    if (window._currentClient) await renderClientTasks(window._currentClient.name);
+  } catch (e) { if (e.message !== '登录已过期') alert('删除失败'); }
+}
+
+function showAddTaskForClient() {
+  if (!checkPermission('add', 'fixed-task')) return;
+  if (!window._currentClient) { alert('请先选择客户'); return; }
+
+  editingId = null;
+  currentModalPage = 'fixed-task';
+  document.getElementById('modal-title').textContent = '新增作业记录';
+
+  // 预填客户名称
+  const formHtml = buildForm('fixed-task', null);
+  document.getElementById('modal-body').innerHTML = formHtml;
+  document.getElementById('modal-overlay').style.display = 'flex';
+
+  // 自动填入当前客户名称
+  const nameInput = document.getElementById('form-clientName');
+  if (nameInput) nameInput.value = window._currentClient.name;
+}
+
+function backToClientList() {
+  window._currentClient = null;
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-client-manage').classList.add('active');
+  document.querySelector('.nav-item[data-page="client-manage"]')?.classList.add('active');
+  document.getElementById('page-title').textContent = PAGE_NAMES['client-manage'];
+  renderTable('client-manage');
+}
+
+// 覆盖 saveModalData 以在保存后刷新客户详情
+const _origSaveModalData = saveModalData;
+saveModalData = async function() {
+  if (currentModalPage === 'user-manage') {
+    await saveUser();
+  } else {
+    await _origSaveModalData();
+  }
+  // 如果在客户详情页，刷新作业列表
+  if (window._currentClient && document.getElementById('page-client-detail').classList.contains('active')) {
+    await renderClientTasks(window._currentClient.name);
+  }
+};
 
 // ==================== 初始化 ====================
 
