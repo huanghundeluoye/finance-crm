@@ -89,11 +89,6 @@
                     <span class="current-user-display" id="current-user-display">当前用户：<strong>未登录</strong></span>
                     <button class="btn btn-sm btn-outline" onclick="showLoginModal()">🔑 登录</button>
                     <button class="btn btn-sm btn-outline" onclick="logout()">🚪 退出</button>
-                    <button class="btn btn-sm btn-outline" onclick="exportData()">📤 导出JSON</button>
-                    <button class="btn btn-sm btn-outline" onclick="exportExcel()">📊 导出Excel</button>
-                    <button class="btn btn-sm btn-outline" onclick="importData()">📥 导入数据</button>
-                    <input type="file" id="importFile" accept=".json,.csv" style="display:none" onchange="handleImport(event)">
-                    <button class="btn btn-sm btn-danger" onclick="clearAllData()">🗑️ 清空数据</button>
                 </div>
             </header>
 
@@ -378,12 +373,14 @@
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label>选择用户</label>
-                    <select id="login-user-select"></select>
+                    <label>用户名</label>
+                    <input type="text" id="login-username" placeholder="请输入用户名" style="width:100%;">
                 </div>
-                <div class="form-group" style="text-align:center;color:#999;font-size:12px;margin-top:10px;">
-                    提示：首次使用请先在"用户与权限"页面添加用户
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="login-password" placeholder="请输入密码" style="width:100%;">
                 </div>
+                <div id="login-error" style="color:#ff4d4f;font-size:13px;display:none;text-align:center;margin-top:10px;"></div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeLoginModal()">取消</button>
@@ -393,7 +390,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
