@@ -69,6 +69,10 @@
                     <span class="nav-icon">❌</span>
                     <span>未成交客户管理</span>
                 </li>
+                <li class="nav-item" data-page="fixed-task">
+                    <span class="nav-icon">📋</span>
+                    <span>固定客户作业表</span>
+                </li>
                 <li class="nav-divider">系统管理</li>
                 <li class="nav-item" data-page="operation-log">
                     <span class="nav-icon">📝</span>
@@ -307,6 +311,19 @@
                             <tr><th>姓名</th><th>电话</th><th>公司</th><th>未成交原因</th><th>负责人</th><th>备注</th><th>操作</th></tr>
                         </thead>
                         <tbody id="lost-client-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- 固定客户作业表 -->
+                <div id="page-fixed-task" class="page">
+                    <div class="page-toolbar">
+                        <button class="btn btn-primary" onclick="showAddModal('fixed-task')">➕ 新增作业</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>客户名称</th><th>日期</th><th>作业内容</th><th>负责人</th><th>状态</th><th>备注</th><th>操作</th></tr>
+                        </thead>
+                        <tbody id="fixed-task-body"></tbody>
                     </table>
                 </div>
 
