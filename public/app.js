@@ -523,7 +523,7 @@ function buildForm(pageKey, item) {
         { label: '联系电话', type: 'text', key: 'phone', value: v('phone', ''), placeholder: '选填' },
         { label: '公司名称', type: 'text', key: 'company', value: v('company', ''), placeholder: '选填' },
         { label: '成交金额', type: 'number', key: 'dealAmount', value: v('dealAmount', ''), placeholder: '成交总金额', min: 0 },
-        { label: '跟进状态', type: 'select', key: 'status', value: v('status', '合作中'), options: ['合作中', '已成交', '跟进中', '需回访'] },
+        { label: '跟进状态', type: 'select', key: 'status', value: v('status', '合作中'), options: ['合作中', '已成交', '跟进中', '需回访', '流失客户'] },
         { label: '负责人', type: 'select', key: 'assignedTo', value: v('assignedTo', ''), options: getSalesUserOptions() },
         { label: '备注', type: 'textarea', key: 'remark', value: v('remark', ''), placeholder: '选填' }
       ];
