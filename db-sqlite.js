@@ -10,7 +10,7 @@ db.pragma('journal_mode = WAL');
 
 init();
 
-// ---------- async wrapper to match pg API ----------
+// ---------- async API (wrapping sync better-sqlite3) ----------
 
 module.exports = {
   get(sql, params) {

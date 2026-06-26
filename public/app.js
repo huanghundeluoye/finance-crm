@@ -829,6 +829,10 @@ saveModalData = async function() {
   } else {
     await origSaveModalData();
   }
+  // 如果在客户详情页，刷新作业列表
+  if (window._currentClient && document.getElementById('page-client-detail').classList.contains('active')) {
+    await renderClientTasks(window._currentClient.name);
+  }
 };
 
 const origDeleteItem = deleteItem;
@@ -837,6 +841,10 @@ deleteItem = async function(pageKey, id) {
     await deleteUser(id);
   } else {
     await origDeleteItem(pageKey, id);
+  }
+  // 如果在客户详情页删除了作业，刷新
+  if (pageKey === 'fixed-task' && window._currentClient && document.getElementById('page-client-detail').classList.contains('active')) {
+    await renderClientTasks(window._currentClient.name);
   }
 };
 
@@ -959,19 +967,7 @@ function backToClientList() {
   renderTable('client-manage');
 }
 
-// 覆盖 saveModalData 以在保存后刷新客户详情
-const _origSaveModalData = saveModalData;
-saveModalData = async function() {
-  if (currentModalPage === 'user-manage') {
-    await saveUser();
-  } else {
-    await _origSaveModalData();
-  }
-  // 如果在客户详情页，刷新作业列表
-  if (window._currentClient && document.getElementById('page-client-detail').classList.contains('active')) {
-    await renderClientTasks(window._currentClient.name);
-  }
-};
+
 
 // ==================== 初始化 ====================
 
